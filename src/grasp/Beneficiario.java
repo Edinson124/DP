@@ -28,9 +28,6 @@ public class Beneficiario {
         this.codigoHogar = codigoHogar;
     }
 
-
-
-
     public int getGenero() {
         return genero;
     }
