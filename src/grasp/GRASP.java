@@ -129,7 +129,7 @@ public class GRASP {
                             todosAsignados = true;
                             for (int n = 0; n<listaCandidatos.length; n++){
                                 if(listaCandidatos[n][2] > 0){                                   
-                                    if(listaCandidatos[n][1] <= maxmin[0] && listaCandidatos[n][1] >= maxmin[1]){//maxmin[0] - alpha*(maxmin[0]-maxmin[1])){
+                                    if(listaCandidatos[n][1] <= maxmin[0] && listaCandidatos[n][1] >= maxmin[0] - alpha*(maxmin[0]-maxmin[1])){
                                         listaRestringida[cont++] = listaCandidatos[n];
                                     }
                                     todosAsignados = false; // verificar la cantidad de horarios por asignar a cada beneficiario
