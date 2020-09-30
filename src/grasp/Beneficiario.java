@@ -18,6 +18,7 @@ public class Beneficiario {
         this.flagMayor = Integer.parseInt(arg[12]);
         this.cantInci = Integer.parseInt(arg[13]);
         this.estado = arg[14];
+        this.horariosRestantes = 2;
     }
 
     public int getCodigoHogar() {
@@ -78,11 +79,23 @@ public class Beneficiario {
     public void setDistrito(Distrito distrito) {
         this.distrito = distrito;
     }
+    
+    public int getHorariosRestantes() {
+        return horariosRestantes;
+    }
+
+    public void setHorariosRestantes(int horariosRestantes) {
+        this.horariosRestantes = horariosRestantes;
+    }
+    
     private int genero;
     private int flagDis;
     private int flagMayor;
     private int cantInci;
     private String estado;
+    private int horariosRestantes;
+
+  
     
     
     

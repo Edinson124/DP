@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Random;
+
 
 public class GRASP {
     public static void main(String[] args) {
@@ -29,49 +31,120 @@ public class GRASP {
         double reduccion_densidad=0.40;
         
         //Matriz de Cantidad de Personas por hora en cada Agencia
-        int cantidadPersonasHora[] = new int[cant_lugares_totales];
-        for (int i = 0; i < cant_lugares_totales; i++){
-            //for (int j = 0; j < 2; j++){
-                LugarCobro l=lugares.get(i);
-                //cantidadPersonasHora[i][0] = l.getIdAgencia();
-                if(l.getDistrito().getDensidad()>limite_densidad)
-                    cantidadPersonasHora[i] = (int)Math.round(l.getCajas()*l.getPerHora()*(1-reduccion_densidad));
-                else cantidadPersonasHora[i] = l.getCajas()*l.getPerHora();
-            //}
-        }
+//        int cantidadPersonasHora[][] = new int[cant_lugares_totales][3];
+//        for (int i = 0; i < cant_lugares_totales; i++){
+//            //for (int j = 0; j < 2; j++){
+//                LugarCobro l=lugares.get(i);
+//                cantidadPersonasHora[i][0] = l.getIdAgencia(); // identificador del lugar de cobro
+//                if(l.getDistrito().getDensidad()>limite_densidad){
+//                    cantidadPersonasHora[i][1] = (int)Math.round(l.getCajas()*l.getPerHora()*(1-reduccion_densidad)); // cantidad de personas por hora
+//                    cantidadPersonasHora[i][2] = (int)Math.round(l.getCajas()*l.getPerHora()*(1-reduccion_densidad)); // cantidad de cupos restantes
+//                }
+//                else{
+//                    cantidadPersonasHora[i][1] = l.getCajas()*l.getPerHora();
+//                    cantidadPersonasHora[i][2] = l.getCajas()*l.getPerHora();
+//                }
+//                
+//            //}
+//        }
         /*for (int i = 0; i < cant_lugares_totales; i++){
             for (int j = 0; j < 2; j++){
                 System.out.println(cantidadPersonasHora[i][j]);
             }
         }*/
         
-        int Semana[] = new int[cant_lugares_totales];
-        Arrays.fill(Semana,1);
-        for (int i = 0; i < cant_lugares_totales; i++){
-           System.out.println(Semana[i]);
-        }
+//        int Semana[] = new int[cant_lugares_totales];
+//        Arrays.fill(Semana,1);
+//        for (int i = 0; i < cant_lugares_totales; i++){
+//           System.out.println(Semana[i]);
+//        }
         
         
         
         Long tiempo_ejecucion = System.currentTimeMillis();
+        int[] horaPreferencial = {8,10};
         int iteraciones = 25;
         for (int i = 0; i < iteraciones; i++){
+            int solucion[][][] = new int[ubigeosPrueba.length][][];
             for (int j=0;j<ubigeosPrueba.length;j++){
                 List<Beneficiario> beneDistrito = beneficiarios.stream().filter(a -> a.getDistrito().getUbigeo()==(ubigeosPrueba[j])).collect(Collectors.toList());
                 System.out.println("Cantidad beneficiarios: "+ beneDistrito.size());
                 List<LugarCobro> lugaresDistritos = lugares.stream().filter(a -> a.getDistrito().getUbigeo()==(ubigeosPrueba[j])).collect(Collectors.toList());
                 System.out.println("Cantidad lugares de cobro: "+ lugaresDistritos.size());
                 
+                int cantidadPersonasHora[][] = new int[lugaresDistritos.size()][6];
+                for (int m = 0; m < lugaresDistritos.size(); m++){
+                    LugarCobro l=lugares.get(m);
+                    cantidadPersonasHora[m][0] = l.getIdAgencia(); // identificador del lugar de cobro
+                    if(l.getDistrito().getDensidad()>limite_densidad){
+                        cantidadPersonasHora[m][1] = (int)Math.round(l.getCajas()*l.getPerHora()*(1-reduccion_densidad)); // cantidad de personas por hora
+                        cantidadPersonasHora[m][2] = (int)Math.round(l.getCajas()*l.getPerHora()*(1-reduccion_densidad)); // cantidad de cupos restantes
+                    }
+                    else{
+                        cantidadPersonasHora[m][1] = l.getCajas()*l.getPerHora();
+                        cantidadPersonasHora[m][2] = l.getCajas()*l.getPerHora();
+                    }
+                    cantidadPersonasHora[m][3] = 1;
+                    cantidadPersonasHora[m][4] = l.getHoraAperturaLV().getHours(); // hora 
+                    cantidadPersonasHora[m][5] = 1; // día
+                }
                 
+                               
                 
+                int solucionxdistrito[][] = new int[beneDistrito.size()+1][lugaresDistritos.size()+1];
+                solucion[j] = new int [beneDistrito.size()+1][lugaresDistritos.size()+1];
                 
+                for(int z = 0; z < beneDistrito.size(); z++){
+                    solucionxdistrito[z][0]=beneDistrito.get(z).getCodigoHogar();
+                }
+                for(int z = 0; z < lugaresDistritos.size(); z++){
+                    solucionxdistrito[0][z]=lugaresDistritos.get(z).getIdAgencia();
+                }
                 
-                
-                
-                
-                
-        
-            break;
+                boolean preferencial = false;
+                boolean todosAsignados = true;
+                int[][] listaCandidatos = new int[beneDistrito.size()][3];
+                while(true){
+                    for(int k = 0; k<lugaresDistritos.size();k++){
+                        LugarCobro lug = lugaresDistritos.get(k);
+                        if(cantidadPersonasHora[k][2] == 0){ // horario lleno
+                            boolean sabado = (cantidadPersonasHora[k][5] % 6 == 0);
+                            boolean viernes = (cantidadPersonasHora[k][5] % 6 == 5);
+                            if(cantidadPersonasHora[k][4] == (sabado?lug.getHoraCierreS().getHours():lug.getHoraAperturaLV().getHours())){
+                                cantidadPersonasHora[k][5]++; // dia siguiente
+                                cantidadPersonasHora[k][4] = viernes?lug.getHoraAperturaS().getHours():lug.getHoraAperturaLV().getHours(); // reinicia horario de apertura
+                            }
+                        }
+                        if(Arrays.asList(horaPreferencial).contains(cantidadPersonasHora[k][4]))
+                           preferencial = true;
+//                        int listaCandidatos[][] = new int[beneDistrito.size()][2];
+                        
+                        int listaRestringida[][] = new int[beneDistrito.size()][3];
+                        double min = 0;
+                        double max = 0;
+                        int cont = 0;
+                        double alpha = 0.3;
+                        
+                        listaCandidatos = calcularBondad(beneDistrito, preferencial,min, max); // [posicion][bondad][horariosRestantes]                      
+                        for (int n = 0; n<listaCandidatos.length; n++){
+                            if(listaCandidatos[n][2] > 0){
+                                if(listaCandidatos[n][1] <= max && listaCandidatos[n][1] >= max - alpha*(max-min)){
+                                    listaRestringida[cont++] = listaCandidatos[n];
+                                }
+                                todosAsignados = false; // verificar la cantidad de horarios por asignar a cada beneficiario
+                            }
+                             
+                        }   
+                        if(todosAsignados) break;
+                        Random rd = new Random();           
+                        int posicion = rd.nextInt(listaRestringida.length);
+                        solucionxdistrito[k+1][listaRestringida[posicion][0]+ 1] = cantidadPersonasHora[k][5]*100 + cantidadPersonasHora[k][4];
+                        beneDistrito.get(posicion).setHorariosRestantes(beneDistrito.get(posicion).getHorariosRestantes()-1);
+                        cantidadPersonasHora[k][2]--; // se disminuye la cantidad de cupos restantes
+                    }                    
+                    if(todosAsignados) break;
+                }
+                solucion[j] = solucionxdistrito;
             }
             break;
         }
