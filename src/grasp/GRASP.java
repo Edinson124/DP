@@ -64,13 +64,14 @@ public class GRASP {
         Long tiempo_ejecucion = System.currentTimeMillis();
         int[] horaPreferencial = {8,10};
         int iteraciones = 25;
+        Algoritmo algoritmo =  new Algoritmo();
         for (int i = 0; i < iteraciones; i++){
             int solucion[][][] = new int[ubigeosPrueba.length][][];
             for (int j=0;j<ubigeosPrueba.length;j++){
                 List<Beneficiario> beneDistrito = beneficiarios.stream().filter(a -> a.getDistrito().getUbigeo()==(ubigeosPrueba[j])).collect(Collectors.toList());
-                System.out.println("Cantidad beneficiarios: "+ beneDistrito.size());
+               // System.out.println("Cantidad beneficiarios: "+ beneDistrito.size());
                 List<LugarCobro> lugaresDistritos = lugares.stream().filter(a -> a.getDistrito().getUbigeo()==(ubigeosPrueba[j])).collect(Collectors.toList());
-                System.out.println("Cantidad lugares de cobro: "+ lugaresDistritos.size());
+               // System.out.println("Cantidad lugares de cobro: "+ lugaresDistritos.size());
                 
                 int cantidadPersonasHora[][] = new int[lugaresDistritos.size()][6];
                 for (int m = 0; m < lugaresDistritos.size(); m++){
@@ -101,46 +102,55 @@ public class GRASP {
                     solucionxdistrito[0][z]=lugaresDistritos.get(z).getIdAgencia();
                 }
                 
-                boolean preferencial = false;
+                int preferencial = 0;
                 boolean todosAsignados = true;
-                int[][] listaCandidatos = new int[beneDistrito.size()][3];
+                int[][] listaCandidatos = new int[beneDistrito.size()][4];
                 while(true){
                     for(int k = 0; k<lugaresDistritos.size();k++){
-                        LugarCobro lug = lugaresDistritos.get(k);
-                        if(cantidadPersonasHora[k][2] == 0){ // horario lleno
-                            boolean sabado = (cantidadPersonasHora[k][5] % 6 == 0);
-                            boolean viernes = (cantidadPersonasHora[k][5] % 6 == 5);
-                            if(cantidadPersonasHora[k][4] == (sabado?lug.getHoraCierreS().getHours():lug.getHoraAperturaLV().getHours())){
-                                cantidadPersonasHora[k][5]++; // dia siguiente
-                                cantidadPersonasHora[k][4] = viernes?lug.getHoraAperturaS().getHours():lug.getHoraAperturaLV().getHours(); // reinicia horario de apertura
+                        int hombres = 0;
+                        int mujeres = 0;
+                        while(cantidadPersonasHora[k][2] != 0){
+                            LugarCobro lug = lugaresDistritos.get(k);
+                            
+                            if(Arrays.asList(horaPreferencial).contains(cantidadPersonasHora[k][4]))
+                               preferencial = 1;
+    //                        int listaCandidatos[][] = new int[beneDistrito.size()][2];
+
+                            int listaRestringida[][] = new int[beneDistrito.size()][4];
+                            double min = 0;
+                            double max = 0;
+                            int cont = 0;
+                            double alpha = 0.3;
+
+                            listaCandidatos = algoritmo.calcularBondad(beneDistrito, preferencial,min, max, hombres, mujeres); // [posicion][bondad][horariosRestantes][sexo]                      
+                            for (int n = 0; n<listaCandidatos.length; n++){
+                                if(listaCandidatos[n][2] > 0){
+                                    if(listaCandidatos[n][1] <= max && listaCandidatos[n][1] >= max - alpha*(max-min)){
+                                        listaRestringida[cont++] = listaCandidatos[n];
+                                    }
+                                    todosAsignados = false; // verificar la cantidad de horarios por asignar a cada beneficiario
+                                }
+
+                            }   
+                            if(todosAsignados) break;
+                            Random rd = new Random();           
+                            int posicion = rd.nextInt(listaRestringida.length);
+                            solucionxdistrito[k+1][listaRestringida[posicion][0]+ 1] = cantidadPersonasHora[k][5]*100 + cantidadPersonasHora[k][4];
+                            beneDistrito.get(posicion).setHorariosRestantes(beneDistrito.get(posicion).getHorariosRestantes()-1);
+                            cantidadPersonasHora[k][2]--; // se disminuye la cantidad de cupos restantes
+                            hombres += listaRestringida[posicion][3]==1?1:0;
+                            mujeres += listaRestringida[posicion][3]==2?1:0;
+                            
+                            if(cantidadPersonasHora[k][2] == 0){ // horario lleno
+                                boolean sabado = (cantidadPersonasHora[k][5] % 6 == 0);
+                                boolean viernes = (cantidadPersonasHora[k][5] % 6 == 5);
+                                if(cantidadPersonasHora[k][4] == (sabado?lug.getHoraCierreS().getHours():lug.getHoraAperturaLV().getHours())){
+                                    cantidadPersonasHora[k][5]++; // dia siguiente
+                                    cantidadPersonasHora[k][4] = viernes?lug.getHoraAperturaS().getHours():lug.getHoraAperturaLV().getHours(); // reinicia horario de apertura
+                                }
+
                             }
                         }
-                        if(Arrays.asList(horaPreferencial).contains(cantidadPersonasHora[k][4]))
-                           preferencial = true;
-//                        int listaCandidatos[][] = new int[beneDistrito.size()][2];
-                        
-                        int listaRestringida[][] = new int[beneDistrito.size()][3];
-                        double min = 0;
-                        double max = 0;
-                        int cont = 0;
-                        double alpha = 0.3;
-                        
-                        listaCandidatos = calcularBondad(beneDistrito, preferencial,min, max); // [posicion][bondad][horariosRestantes]                      
-                        for (int n = 0; n<listaCandidatos.length; n++){
-                            if(listaCandidatos[n][2] > 0){
-                                if(listaCandidatos[n][1] <= max && listaCandidatos[n][1] >= max - alpha*(max-min)){
-                                    listaRestringida[cont++] = listaCandidatos[n];
-                                }
-                                todosAsignados = false; // verificar la cantidad de horarios por asignar a cada beneficiario
-                            }
-                             
-                        }   
-                        if(todosAsignados) break;
-                        Random rd = new Random();           
-                        int posicion = rd.nextInt(listaRestringida.length);
-                        solucionxdistrito[k+1][listaRestringida[posicion][0]+ 1] = cantidadPersonasHora[k][5]*100 + cantidadPersonasHora[k][4];
-                        beneDistrito.get(posicion).setHorariosRestantes(beneDistrito.get(posicion).getHorariosRestantes()-1);
-                        cantidadPersonasHora[k][2]--; // se disminuye la cantidad de cupos restantes
                     }                    
                     if(todosAsignados) break;
                 }
