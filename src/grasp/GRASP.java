@@ -112,11 +112,13 @@ public class GRASP {
                         int hombres = 0;
                         int mujeres = 0;                        
                         while(cantidadPersonasHora[k][2] != 0){
-                            
+                            todosAsignados = true;
                             LugarCobro lug = lugaresDistritos.get(k);
                             
                             if(Arrays.asList(horaPreferencial).contains(cantidadPersonasHora[k][4]))
                                preferencial = 1;
+                            else
+                                preferencial = 0;
     //                        int listaCandidatos[][] = new int[beneDistrito.size()][2];
 
                             int listaRestringida[][] = new int[beneDistrito.size()][4];                            
@@ -127,36 +129,45 @@ public class GRASP {
                             todosAsignados = true;
                             for (int n = 0; n<listaCandidatos.length; n++){
                                 if(listaCandidatos[n][2] > 0){                                   
-                                    if(listaCandidatos[n][1] <= maxmin[0] && listaCandidatos[n][1] >= maxmin[0] - alpha*(maxmin[0]-maxmin[1])){
+                                    if(listaCandidatos[n][1] <= maxmin[0] && listaCandidatos[n][1] >= maxmin[1]){//maxmin[0] - alpha*(maxmin[0]-maxmin[1])){
                                         listaRestringida[cont++] = listaCandidatos[n];
                                     }
                                     todosAsignados = false; // verificar la cantidad de horarios por asignar a cada beneficiario
                                 }
 
-                            }                           
-                            if(todosAsignados) break;
+                            }       
+                            boolean sabado = (cantidadPersonasHora[k][5] % 6 == 0);
+                            boolean viernes = (cantidadPersonasHora[k][5] % 6 == 5);
+                            if(todosAsignados) {
+                                if(cantidadPersonasHora[k][4] == (sabado?lug.getHoraCierreS().getHours():lug.getHoraCierreLV().getHours())){
+                                    cantidadPersonasHora[k][5]++; // dia siguiente
+                                    cantidadPersonasHora[k][4] = viernes?lug.getHoraAperturaS().getHours():lug.getHoraAperturaLV().getHours(); // reinicia horario de apertura
+                                }
+                                break;
+                            }
                             Random rd = new Random();           
                             int pos_restringida = rd.nextInt(listaRestringida.length);                            
                             int posicion=listaRestringida[pos_restringida][0];
                             //solucionxdistrito[k+1][listaRestringida[posicion][0]+ 1] = cantidadPersonasHora[k][5]*100 + cantidadPersonasHora[k][4];
                             solucionxdistrito[listaRestringida[posicion][0]+ 1][k+1] = cantidadPersonasHora[k][5]*100 + cantidadPersonasHora[k][4];
-                            beneDistrito.get(posicion).setHorariosRestantes(beneDistrito.get(posicion).getHorariosRestantes()-1);
+                            int hRestantes = beneDistrito.get(posicion).getHorariosRestantes()-1;
+                            beneDistrito.get(posicion).setHorariosRestantes(hRestantes);
                             //System.out.println(beneDistrito.get(posicion).getHorariosRestantes());
                             cantidadPersonasHora[k][2]--; // se disminuye la cantidad de cupos restantes
                             hombres += listaRestringida[posicion][3]==1?1:0;
                             mujeres += listaRestringida[posicion][3]==2?1:0;
                             
                             if(cantidadPersonasHora[k][2] == 0){ // horario lleno
-                                boolean sabado = (cantidadPersonasHora[k][5] % 6 == 0);
-                                boolean viernes = (cantidadPersonasHora[k][5] % 6 == 5);
-                                if(cantidadPersonasHora[k][4] == (sabado?lug.getHoraCierreS().getHours():lug.getHoraAperturaLV().getHours())){
+                                
+                                if(cantidadPersonasHora[k][4] == (sabado?lug.getHoraCierreS().getHours():lug.getHoraCierreLV().getHours())){
                                     cantidadPersonasHora[k][5]++; // dia siguiente
                                     cantidadPersonasHora[k][4] = viernes?lug.getHoraAperturaS().getHours():lug.getHoraAperturaLV().getHours(); // reinicia horario de apertura
-                                }
-                                
+                                } 
+                                break;
                             }
                         }
                         cantidadPersonasHora[k][2]=cantidadPersonasHora[k][1];
+                        cantidadPersonasHora[k][4]+=1;
                     }                    
                     if(todosAsignados) break;
                 }

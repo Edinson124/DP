@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class LeerCsv {
     public ArrayList<LugarCobro> leer(){
         ArrayList<LugarCobro> datos = new ArrayList<LugarCobro>();
-        Path filepath = Paths.get("C:\\Users\\USUARIO\\Downloads\\as.csv");
+        Path filepath = Paths.get("C:\\Users\\yeriv\\Downloads\\as.csv");
         try{
             BufferedReader br = Files.newBufferedReader(filepath);
             String linea,cab;
@@ -28,7 +28,7 @@ public class LeerCsv {
     }
     public ArrayList<Beneficiario> leerBene(){
         ArrayList<Beneficiario> datos = new ArrayList<Beneficiario>();
-        Path filepath = Paths.get("C:\\Users\\USUARIO\\Downloads\\bs.csv");
+        Path filepath = Paths.get("C:\\Users\\yeriv\\Downloads\\bs.csv");
         try{
             BufferedReader br = Files.newBufferedReader(filepath);
             String linea,cab;
