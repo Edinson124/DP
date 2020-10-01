@@ -18,7 +18,7 @@ public class Beneficiario {
         this.flagMayor = Integer.parseInt(arg[12]);
         this.cantInci = Integer.parseInt(arg[13]);
         this.estado = arg[14];
-        this.horariosRestantes = 1;
+        this.horariosRestantes = 2;
     }
 
     public int getCodigoHogar() {

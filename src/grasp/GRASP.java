@@ -64,9 +64,10 @@ public class GRASP {
         Long tiempo_ejecucion = System.currentTimeMillis();
         Integer[] horaPreferencial = {8};
         int iteraciones = 1;
+        int maxTurnos = 2;
         Algoritmo algoritmo =  new Algoritmo();
         for (int i = 0; i < iteraciones; i++){            
-            int solucion[][][] = new int[ubigeosPrueba.length][][];
+            String solucion[][][] = new String[ubigeosPrueba.length][][];
             for (int j=0;j<ubigeosPrueba.length;j++){                
                 int ubigeo=ubigeosPrueba[j];                
                 System.out.println("AYUDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"+ubigeo );
@@ -92,14 +93,14 @@ public class GRASP {
                     cantidadPersonasHora[m][5] = 1; // día
                 }          
                 
-                int solucionxdistrito[][] = new int[beneDistrito.size()+1][lugaresDistritos.size()+1];
-                solucion[j] = new int [beneDistrito.size()+1][lugaresDistritos.size()+1];
+                String solucionxdistrito[][] = new String[beneDistrito.size()+1][lugaresDistritos.size()+1];
+                solucion[j] = new String [beneDistrito.size()+1][lugaresDistritos.size()+1];
                 
                 for(int z = 0; z < beneDistrito.size(); z++){
-                    solucionxdistrito[z+1][0]=beneDistrito.get(z).getCodigoHogar();                    
+                    solucionxdistrito[z+1][0]=beneDistrito.get(z).getCodigoHogar()+"";                    
                 }
                 for(int z = 0; z < lugaresDistritos.size(); z++){
-                    solucionxdistrito[0][z+1]=lugaresDistritos.get(z).getIdAgencia();
+                    solucionxdistrito[0][z+1]=lugaresDistritos.get(z).getIdAgencia()+"";
                     //System.out.println("cod agencia: "+ solucionxdistrito[0][z+1]);
                     
                 }
@@ -160,7 +161,19 @@ public class GRASP {
                             int posicion=listaRestringida[pos_restringida][0];
                             //System.out.println("pruebaa: "+solucionxdistrito[0][0]);
                             //solucionxdistrito[k+1][listaRestringida[posicion][0]+ 1] = cantidadPersonasHora[k][5]*100 + cantidadPersonasHora[k][4];
-                            solucionxdistrito[posicion+ 1][k+1] = cantidadPersonasHora[k][5]*100 + cantidadPersonasHora[k][4];
+                            boolean cambiarDia = false;
+                            if(solucionxdistrito[posicion+ 1][k+1]!= null){
+                                String[] turnos = solucionxdistrito[posicion+ 1][k+1].split(",");
+                                for(int t=0;t< turnos.length;t++){
+                                    int tur = Integer.parseInt(turnos[t]);
+                                    if(tur/100 == cantidadPersonasHora[k][5])
+                                        cambiarDia = true;
+                                }
+                                if(!cambiarDia)
+                                    solucionxdistrito[posicion+ 1][k+1] +="," + (cantidadPersonasHora[k][5]*100 + cantidadPersonasHora[k][4])+"";
+                            }
+                            else
+                                solucionxdistrito[posicion+ 1][k+1] =(cantidadPersonasHora[k][5]*100 + cantidadPersonasHora[k][4])+"";
                             int hRestantes = beneDistrito.get(posicion).getHorariosRestantes()-1;
                             if(hRestantes == 0)
                                 faltantes--;
@@ -199,7 +212,7 @@ public class GRASP {
                     System.out.println("---------------------------------------- ");
                     int a=0;
                     for(int y=1;y<beneDistrito.size()+1;y++){
-                        if(solucionxdistrito[y][z]>0){
+                        if(solucionxdistrito[y][z]!= null){
                             a++;
                         System.out.println(solucionxdistrito[y][0]+"                   "+solucionxdistrito[y][z]);
                         }
