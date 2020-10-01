@@ -26,7 +26,7 @@ public class GRASP {
         System.out.println("Cantidad lugares: "+cant_lugares_totales);
         System.out.println("Cantidad beneficiarios: "+cant_bene);
         
-        int[] ubigeosPrueba = {150132,150137,40101,130101,130111};
+        int[] ubigeosPrueba = {150132};//,150137,40101,130101,130111};
         double limite_densidad=0.020;
         double reduccion_densidad=0.40;
         
@@ -63,7 +63,7 @@ public class GRASP {
         
         Long tiempo_ejecucion = System.currentTimeMillis();
         int[] horaPreferencial = {8,10};
-        int iteraciones = 25;
+        int iteraciones = 1;
         Algoritmo algoritmo =  new Algoritmo();
         for (int i = 0; i < iteraciones; i++){            
             int solucion[][][] = new int[ubigeosPrueba.length][][];
@@ -98,20 +98,23 @@ public class GRASP {
                 solucion[j] = new int [beneDistrito.size()+1][lugaresDistritos.size()+1];
                 
                 for(int z = 0; z < beneDistrito.size(); z++){
-                    solucionxdistrito[z][0]=beneDistrito.get(z).getCodigoHogar();
+                    solucionxdistrito[z+1][0]=beneDistrito.get(z).getCodigoHogar();
                 }
                 for(int z = 0; z < lugaresDistritos.size(); z++){
-                    solucionxdistrito[0][z]=lugaresDistritos.get(z).getIdAgencia();
+                    solucionxdistrito[0][z+1]=lugaresDistritos.get(z).getIdAgencia();
+                    //System.out.println("cod agencia: "+ solucionxdistrito[0][z+1]);
+                    
                 }
                 
                 int preferencial = 0;
+                int faltantes = beneDistrito.size();
                 boolean todosAsignados = true;
                 int[][] listaCandidatos = new int[beneDistrito.size()][4];
-                while(true){                    
+                while(faltantes>0){                    
                     for(int k = 0; k<lugaresDistritos.size();k++){                        
                         int hombres = 0;
                         int mujeres = 0;                        
-                        while(cantidadPersonasHora[k][2] != 0){
+                        while(cantidadPersonasHora[k][2] > 0){
                             todosAsignados = true;
                             LugarCobro lug = lugaresDistritos.get(k);
                             
@@ -123,19 +126,22 @@ public class GRASP {
 
                             int listaRestringida[][] = new int[beneDistrito.size()][4];                            
                             int cont = 0;
-                            double alpha = 0.3;
+                            double alpha = 0.9;
                             double[] maxmin={0,0};
                             listaCandidatos = algoritmo.calcularBondad(beneDistrito, preferencial,maxmin, hombres, mujeres); // [posicion][bondad][horariosRestantes][sexo]                            
                             todosAsignados = true;
+                            
                             for (int n = 0; n<listaCandidatos.length; n++){
                                 if(listaCandidatos[n][2] > 0){                                   
                                     if(listaCandidatos[n][1] <= maxmin[0] && listaCandidatos[n][1] >= maxmin[0] - alpha*(maxmin[0]-maxmin[1])){
                                         listaRestringida[cont++] = listaCandidatos[n];
+                                        //System.out.println("jsjsjsjss"+listaCandidatos[n][1]);
                                     }
                                     todosAsignados = false; // verificar la cantidad de horarios por asignar a cada beneficiario
                                 }
 
-                            }       
+                            }    
+                            //System.out.println("tama"+ cont);
                             boolean sabado = (cantidadPersonasHora[k][5] % 6 == 0);
                             boolean viernes = (cantidadPersonasHora[k][5] % 6 == 5);
                             if(todosAsignados) {
@@ -146,11 +152,16 @@ public class GRASP {
                                 break;
                             }
                             Random rd = new Random();           
-                            int pos_restringida = rd.nextInt(listaRestringida.length);                            
+                            int pos_restringida = rd.nextInt(cont);                            
                             int posicion=listaRestringida[pos_restringida][0];
+                            //System.out.println("pruebaa: "+solucionxdistrito[0][0]);
                             //solucionxdistrito[k+1][listaRestringida[posicion][0]+ 1] = cantidadPersonasHora[k][5]*100 + cantidadPersonasHora[k][4];
                             solucionxdistrito[listaRestringida[posicion][0]+ 1][k+1] = cantidadPersonasHora[k][5]*100 + cantidadPersonasHora[k][4];
                             int hRestantes = beneDistrito.get(posicion).getHorariosRestantes()-1;
+                            if(hRestantes == 0)
+                                faltantes--;
+                            System.out.println("falta: "+faltantes);
+                            //System.out.println("retasta: "+beneDistrito.get(posicion).getCodigoHogar()+"-"+solucionxdistrito[posicion+1][0]);
                             beneDistrito.get(posicion).setHorariosRestantes(hRestantes);
                             //System.out.println(beneDistrito.get(posicion).getHorariosRestantes());
                             cantidadPersonasHora[k][2]--; // se disminuye la cantidad de cupos restantes
@@ -169,9 +180,10 @@ public class GRASP {
                         cantidadPersonasHora[k][2]=cantidadPersonasHora[k][1];
                         cantidadPersonasHora[k][4]+=1;
                     }                    
-                    if(todosAsignados) break;
+                    //if(todosAsignados) break;
+                    solucion[j] = solucionxdistrito;
                 }
-                solucion[j] = solucionxdistrito;
+                //solucion[j] = solucionxdistrito;
                 
                 System.out.println("------------------------------------------------------------------------");
                 System.out.println("UBIGEO: "+ubigeo);
@@ -181,7 +193,7 @@ public class GRASP {
                     System.out.println("ID BENEFICIARIO                  TURNO ");
                     System.out.println("---------------------------------------- ");
                     int a=0;
-                    for(int y=1;y<beneDistrito.size();y++){
+                    for(int y=1;y<beneDistrito.size()+1;y++){
                         if(solucionxdistrito[y][z]>0){
                             a++;
                         System.out.println(solucionxdistrito[y][0]+"                   "+solucionxdistrito[y][z]);
