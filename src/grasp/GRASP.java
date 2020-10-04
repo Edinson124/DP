@@ -30,39 +30,9 @@ public class GRASP {
         double limite_densidad=0.020;
         double reduccion_densidad=0.40;
         
-        //Matriz de Cantidad de Personas por hora en cada Agencia
-//        int cantidadPersonasHora[][] = new int[cant_lugares_totales][3];
-//        for (int i = 0; i < cant_lugares_totales; i++){
-//            //for (int j = 0; j < 2; j++){
-//                LugarCobro l=lugares.get(i);
-//                cantidadPersonasHora[i][0] = l.getIdAgencia(); // identificador del lugar de cobro
-//                if(l.getDistrito().getDensidad()>limite_densidad){
-//                    cantidadPersonasHora[i][1] = (int)Math.round(l.getCajas()*l.getPerHora()*(1-reduccion_densidad)); // cantidad de personas por hora
-//                    cantidadPersonasHora[i][2] = (int)Math.round(l.getCajas()*l.getPerHora()*(1-reduccion_densidad)); // cantidad de cupos restantes
-//                }
-//                else{
-//                    cantidadPersonasHora[i][1] = l.getCajas()*l.getPerHora();
-//                    cantidadPersonasHora[i][2] = l.getCajas()*l.getPerHora();
-//                }
-//                
-//            //}
-//        }
-        /*for (int i = 0; i < cant_lugares_totales; i++){
-            for (int j = 0; j < 2; j++){
-                System.out.println(cantidadPersonasHora[i][j]);
-            }
-        }*/
-        
-//        int Semana[] = new int[cant_lugares_totales];
-//        Arrays.fill(Semana,1);
-//        for (int i = 0; i < cant_lugares_totales; i++){
-//           System.out.println(Semana[i]);
-//        }
-        
-        
         
         Long tiempo_ejecucion = System.currentTimeMillis();
-        Integer[] horaPreferencial = {8};
+        Integer[] horaPreferencial = {8,9};
         int iteraciones = 1;
         int maxTurnos = 2;
         Algoritmo algoritmo =  new Algoritmo();
@@ -70,7 +40,7 @@ public class GRASP {
             String solucion[][][] = new String[ubigeosPrueba.length][][];
             for (int j=0;j<ubigeosPrueba.length;j++){                
                 int ubigeo=ubigeosPrueba[j];                
-                System.out.println("AYUDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"+ubigeo );
+                //System.out.println("AYUDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"+ubigeo );
                 List<Beneficiario> beneDistrito = beneficiarios.stream().filter(a -> a.getDistrito().getUbigeo()==(ubigeo)).collect(Collectors.toList());
                // System.out.println("Cantidad beneficiarios: "+ beneDistrito.size());
                 List<LugarCobro> lugaresDistritos = lugares.stream().filter(a -> a.getDistrito().getUbigeo()==(ubigeo)).collect(Collectors.toList());
@@ -111,8 +81,8 @@ public class GRASP {
                 int[][] listaCandidatos = new int[beneDistrito.size()][4];
                 while(faltantes>0){                    
                     for(int k = 0; k<lugaresDistritos.size();k++){                        
-                        int hombres = 0;
-                        int mujeres = 0;                        
+                        double hombres = 0;
+                        double mujeres = 0;                        
                         while(cantidadPersonasHora[k][2] > 0){
                             todosAsignados = true;
                             LugarCobro lug = lugaresDistritos.get(k);
@@ -128,12 +98,13 @@ public class GRASP {
 
                             int listaRestringida[][] = new int[beneDistrito.size()][4];                            
                             int cont = 0;
-                            double alpha = 0.7;
+                            double alpha = 0.1;
                             double[] maxmin={0,0};
                             listaCandidatos = algoritmo.calcularBondad(beneDistrito, preferencial,maxmin, hombres, mujeres); // [posicion][bondad][horariosRestantes][sexo]                            
                             todosAsignados = true;
                             
                             for (int n = 0; n<listaCandidatos.length; n++){
+                            //for (int n = 0; n<20; n++){
 //                                int indice = listaCandidatos[n][0];
 //                                if(beneDistrito.get(indice).getCodigoHogar()==267)
 //                                    System.out.println("fitness: "+listaCandidatos[n][1]);
@@ -178,29 +149,35 @@ public class GRASP {
                             if(hRestantes == 0)
                                 faltantes--;
                             //System.out.println("falta: "+faltantes);
-                            System.out.println("flag: "+"-"+beneDistrito.get(posicion).getFlagDis()+"-"+beneDistrito.get(posicion).getFlagMayor()+"-");
-                            System.out.println("retasta: "+beneDistrito.get(posicion).getCodigoHogar()+"-"+solucionxdistrito[posicion+1][0]+"-"+(cantidadPersonasHora[k][5]*100 + cantidadPersonasHora[k][4])+"-"+listaRestringida[pos_restringida][1]);
+                            System.out.println("flag: "+"Discapacitado: "+beneDistrito.get(posicion).getFlagDis()+" - Adulto mayor: "+beneDistrito.get(posicion).getFlagMayor());
+                            System.out.println("asignacion: "+beneDistrito.get(posicion).getCodigoHogar()+"-"+solucionxdistrito[posicion+1][0]+"-"+(cantidadPersonasHora[k][5]*100 + cantidadPersonasHora[k][4])+"-"+listaRestringida[pos_restringida][1]);
                             beneDistrito.get(posicion).setHorariosRestantes(hRestantes);
                             //System.out.println(beneDistrito.get(posicion).getHorariosRestantes());
                             System.out.println();
                             cantidadPersonasHora[k][2]--; // se disminuye la cantidad de cupos restantes
-                            hombres += listaRestringida[posicion][3]==1?1:0;
-                            mujeres += listaRestringida[posicion][3]==2?1:0;
-                            
+                            hombres += listaRestringida[pos_restringida][3]==1?1:0;
+                            mujeres += listaRestringida[pos_restringida][3]==2?1:0;
+                            if(faltantes == 0){
+                                System.out.println("Ultimo turno del distrito: "+(cantidadPersonasHora[k][5]*100 + cantidadPersonasHora[k][4]));
+                            }
                             if(cantidadPersonasHora[k][2] == 0){ // horario lleno                                
                                 if(cantidadPersonasHora[k][4] == (sabado?lug.getHoraCierreS().getHours():lug.getHoraCierreLV().getHours())){
                                     cantidadPersonasHora[k][5]++; // dia siguiente
                                     cantidadPersonasHora[k][4] = viernes?lug.getHoraAperturaS().getHours():lug.getHoraAperturaLV().getHours(); // reinicia horario de apertura
-                                } 
+                                }else{
+                                    cantidadPersonasHora[k][4]+=1;
+                                }                                
                                 break;
                             }
                         }
+                        System.out.println("hombres: "+hombres+" - Mujeres: "+mujeres);
                         cantidadPersonasHora[k][2]=cantidadPersonasHora[k][1];
-                        cantidadPersonasHora[k][4]+=1;
+                        
                     }                    
                     //if(todosAsignados) break;
                     solucion[j] = solucionxdistrito;
                 }
+                
                 //solucion[j] = solucionxdistrito;
                 
                 System.out.println("------------------------------------------------------------------------");
