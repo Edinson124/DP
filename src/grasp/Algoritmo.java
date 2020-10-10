@@ -1,6 +1,7 @@
 
 package grasp;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -9,30 +10,38 @@ import java.util.List;
  * @author USUARIO
  */
 public class Algoritmo {
-    public int[][] calcularBondad(List<Beneficiario> beneDistrito, int preferencial,double[] maxmin, double hombres, double mujeres){
-        int[][] candidatos = new int[beneDistrito.size()][4];
-        int cont = 0;
+    public List<Candidato> inicializar(List<Beneficiario> beneDistrito){
+        List<Candidato> candidatos= new ArrayList<Candidato>();
         for(int i= 0; i< beneDistrito.size(); i++){
             Beneficiario ben = beneDistrito.get(i);
             int hom = ben.getGenero()==1?1:0;
             if(ben.getHorariosRestantes()>0){
-                candidatos[cont][0] = i; 
-                candidatos[cont][1] = (int)((preferencial*( 5*ben.getFlagDis()+ 5*ben.getFlagMayor()) + (1-preferencial) *(5*(1-ben.getFlagDis())+ 5*(1-ben.getFlagMayor()))) /(1+2*ben.getCantInci() + 3*(((hom*hombres+(1-hom)*mujeres))/(1+(hombres+mujeres))))); 
-                candidatos[cont][2] = ben.getHorariosRestantes();
-                candidatos[cont][3] = ben.getGenero();
-//                if (ben.getCodigoHogar()==267)
-//                    System.out.println("algoo: "+candidatos[cont][1]+"-"+ben.getFlagDis()+"-"+ben.getFlagMayor()+"-"+preferencial);
-                if(cont==0){maxmin[0]=candidatos[cont][1];maxmin[1]=candidatos[cont][1];}
+                Candidato c= new Candidato(i,ben.getHorariosRestantes());
+                candidatos.add(c);
+            }
+        } 
+        return candidatos;
+        
+    }
+    public void calcularBondad(List<Candidato> candidatos,List<Beneficiario> beneDistrito, int preferencial,double[] maxmin, double hombres, double mujeres){
+        int pri=1;
+        for(int i= 0; i< candidatos.size(); i++){
+            int pos=candidatos.get(i).getPosicion();
+            Beneficiario ben = beneDistrito.get(pos);
+            int hom = ben.getGenero()==1?1:0;
+                pri=0;
+                int bond= (int)((preferencial*( 5*ben.getFlagDis()+ 5*ben.getFlagMayor()) + (1-preferencial) *(5*(1-ben.getFlagDis())+ 5*(1-ben.getFlagMayor()))) /(1+2*ben.getCantInci() + 3*(((hom*hombres+(1-hom)*mujeres))/(1+(hombres+mujeres))))); 
+                //System.out.println(bond);
+                candidatos.get(i).setBondad(bond);
+                if(pri==1){maxmin[0]=bond;maxmin[1]=bond;}
                 else {
-                    if(candidatos[cont][1]>maxmin[0]) maxmin[0]=candidatos[cont][1];
-                    if(candidatos[cont][1]<=maxmin[1]) maxmin[1]=candidatos[cont][1];
+                    if(bond>maxmin[0]) maxmin[0]=bond;
+                    if(bond<=maxmin[1]) maxmin[1]=bond;
                 }
-                cont++;
             }
         }  
        // Quicksort(candidatos, 0, cont-1);
-        return candidatos;
-    }
+    
     
     
     public void Quicksort(int[][] v, int prim, int ult){
