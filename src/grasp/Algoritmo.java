@@ -30,9 +30,15 @@ public class Algoritmo {
             Beneficiario ben = beneDistrito.get(pos);
             int hom = ben.getGenero()==1?1:0;
                 pri=0;
-                int bond= (int)((preferencial*( 5*ben.getFlagDis()+ 5*ben.getFlagMayor()) + (1-preferencial) *(5*(1-ben.getFlagDis())+ 5*(1-ben.getFlagMayor()))) /(1+2*ben.getCantInci() + 3*(((hom*hombres+(1-hom)*mujeres))/(1+(hombres+mujeres))))); 
+                int prio=0;
+                if((ben.getFlagDis()==1)||(ben.getFlagMayor()==1)){
+                    prio=1;
+                }
+                //int bond= (int)((preferencial*( 5*ben.getFlagDis()+ 5*ben.getFlagMayor()) + (1-preferencial) *(5*(1-ben.getFlagDis())+ 5*(1-ben.getFlagMayor()))) /(1+2*ben.getCantInci()+ 3*(((hom*hombres+(1-hom)*mujeres))/(1+(hombres+mujeres))))); 
+                int bond= (int)((preferencial*(5*prio) + (1-preferencial) *(5*(1-prio)))+(2*candidatos.get(i).getHorarioRestantes()) /(1+ 3*(((hom*hombres+(1-hom)*mujeres))/(1+(hombres+mujeres))))); 
                 //System.out.println(bond);
                 candidatos.get(i).setBondad(bond);
+                
                 if(pri==1){maxmin[0]=bond;maxmin[1]=bond;}
                 else {
                     if(bond>maxmin[0]) maxmin[0]=bond;

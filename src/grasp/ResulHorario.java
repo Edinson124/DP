@@ -1,6 +1,7 @@
 package grasp;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -28,19 +29,28 @@ public class ResulHorario {
         this.cantHombres = 0;
     }
     
-    public void nuevobene(int indice, int pos,int gen,int priori){
-        if (gen == 1){cantHombres++;}
-        else{cantMujeres++;}
-        if(priori==1){
-            noPrioridad.add(indice);
-            posNoPrioridad.add(pos);
+    public boolean nuevobeneHorario(int indice, int pos,int gen,int priori){
+        //System.out.println("Indice; -------------"+indice);
+        if(priori==0){
             
+            boolean esta=noPrioridad.contains(indice);
+            //System.out.println("ESTA; -------------"+esta);
+            if(esta){return false;}
+            else{noPrioridad.add(indice);
+            posNoPrioridad.add(pos);            
+            }
         }else{
-            prioridad.add(indice);
-            posprioridad.add(pos);
+            boolean esta=prioridad.contains(indice);
+            //System.out.println("ESTA; -------------"+esta);
+            if(esta){return false;}
+            else{prioridad.add(indice);
+            posprioridad.add(pos);            
+            }
         }
-        
-        }
+        if (gen == 1){cantHombres++;}
+        else{cantMujeres++;}        
+    return true;    
+    }
     
     
     
