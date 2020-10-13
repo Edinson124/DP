@@ -36,6 +36,24 @@ public class LugarCobro {
         }
     }
     
+    public LugarCobro(String[] arg,int x)  {
+        try {
+            this.idAgencia = Integer.parseInt(arg[0]);
+            this.codigo = Integer.parseInt(arg[1]);
+            this.distrito = new Distrito(arg[2],arg[3]);
+            this.horaAperturaLV = new SimpleDateFormat("HH:mm").parse(arg[5]);
+            this.horaCierreLV = new SimpleDateFormat("HH:mm").parse(arg[6]);
+            this.horaAperturaS = new SimpleDateFormat("HH:mm").parse(arg[7]);
+            this.horaCierreS = new SimpleDateFormat("HH:mm").parse(arg[8]);
+            this.tipo = arg[9];
+            this.cajas = Integer.parseInt(arg[10]);
+            this.perHora = Integer.parseInt(arg[11]);
+            this.estado = arg[12];
+        } catch (ParseException ex) {
+            Logger.getLogger(LugarCobro.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     public int getIdAgencia() {
         return idAgencia;
     }
