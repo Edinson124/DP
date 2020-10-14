@@ -14,32 +14,7 @@ public class ResulAgencia {
     private int apertura_S;
     private int cierre_S;
     private List<ResulHorario> horarios = new ArrayList<ResulHorario>();
-    
-    public void cambiarHorario(int x,int y){
-        ResulHorario horarioX=horarios.get(x);
-        int diaX=horarioX.getDia();
-        int horaX=horarioX.getHora();
-        ResulHorario horarioY=horarios.get(y);
-        int diaY=horarioY.getDia();
-        int horaY=horarioY.getHora();
-        horarios.set(y, horarioX);
-        horarios.set(x, horarioY);
-        horarios.get(x).setDia(diaX);
-        horarios.get(x).setHora(horaX);
-        horarios.get(y).setDia(diaY);
-        horarios.get(y).setHora(horaY);
-        
-    }
-    
-    
-    
-    public ResulHorario getUnHorario(int n){
-        return horarios.get(n);
-    }
-    public int sizeHorarios(){
-        return horarios.size();
-    }
-    
+
     public int getApertura_LV() {
         return apertura_LV;
     }

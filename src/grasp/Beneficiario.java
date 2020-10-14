@@ -20,20 +20,6 @@ public class Beneficiario {
         this.estado = arg[14];
         this.horariosRestantes = 2;
     }
-        public Beneficiario(String[] arg,int horarios,int restar,int max) {
-        this.codigoHogar = Integer.parseInt(arg[0]);
-        this.distrito = new Distrito(arg[1]);
-        this.genero = Integer.parseInt(arg[2]);
-        this.flagDis = Integer.parseInt(arg[4]);
-        this.flagMayor = Integer.parseInt(arg[5]);
-        this.cantInci = Integer.parseInt(arg[6]);
-        this.estado = arg[7];
-        if(cantInci>max){
-            this.horariosRestantes = horarios-restar;
-        }else{
-            this.horariosRestantes = horarios;            
-        }
-    }
 
     public int getCodigoHogar() {
         return codigoHogar;

@@ -19,13 +19,6 @@ public class ResulHorario {
     private List<Integer> prioridad = new ArrayList<Integer>();
     private List<Integer> posprioridad = new ArrayList<Integer>();
 
-    public int sizeNoProridad(){
-        return noPrioridad.size();
-    }
-    public int sizeProridad(){
-        return prioridad.size();
-    }
-    
     public ResulHorario() {
     }
 

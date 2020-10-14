@@ -17,13 +17,7 @@ public class Distrito {
         this.contagiados = Integer.parseInt(con);
         this.densidad=Double.parseDouble(den);
     }
-    public Distrito(String ubigeo,String den) {
-        this.ubigeo=Integer.parseInt(ubigeo);
-        this.densidad=Double.parseDouble(den);
-    }
-    public Distrito(String ubigeo) {
-        this.ubigeo=Integer.parseInt(ubigeo);
-    }
+
     public Distrito() {
     }
 

@@ -15,39 +15,33 @@ import java.util.Random;
 public class GRASP {
     public static void main(String[] args) {
         //BASE DE DATOS
-        int restar_horarios=1;
-        int cantidad_maxima_inci=2;
-        int cantidad_horarios=2;
         LeerCsv lector= new LeerCsv();
         ArrayList<LugarCobro> lugares = new ArrayList<LugarCobro>();
         lugares=lector.leer();
         int cant_lugares_totales = lugares.size();
         ArrayList<Beneficiario> beneficiarios = new ArrayList<Beneficiario>();
-        beneficiarios=lector.leerBene(restar_horarios,cantidad_horarios,cantidad_maxima_inci);
+        beneficiarios=lector.leerBene();
         int cant_bene = beneficiarios.size();
         System.out.println("cargamos");
         System.out.println("Cantidad lugares: "+cant_lugares_totales);
         System.out.println("Cantidad beneficiarios: "+cant_bene);
         
-        int[] ubigeosPrueba = {100000,100001,100002,100003,100004,100005,100006,100007,100008,100009,100010};
-        //,150137,40101,130101,130111};
+        int[] ubigeosPrueba = {150132};//,150137,40101,130101,130111};
         double limite_densidad=0.020;
         double reduccion_densidad=0.40;
         //Long tiempo_ejecucion = System.currentTimeMillis();
         Integer[] horaPreferencial = {8,9};
-        int iteraciones = 10;
+        int iteraciones = 1;
         int maxTurnos = 2;
         Algoritmo algoritmo =  new Algoritmo();
         int funcion=0;
-        for (int i = 0; i < iteraciones; i++){
-            System.out.println("ITERACION:  "+i);
+        List<Integer[]> horarios_preferencial= new ArrayList<Integer[]>();
+        List<Integer[]> horarios_no_preferencial= new ArrayList<Integer[]>();
+        for (int i = 0; i < iteraciones; i++){            
             List<ResulAgencia> resultado= new ArrayList<ResulAgencia>();
-            for (int j=0;j<ubigeosPrueba.length;j++){
-            List<Integer[]> horarios_preferencial= new ArrayList<Integer[]>();
-            List<Integer[]> horarios_no_preferencial= new ArrayList<Integer[]>();
-            List<Integer> agencias= new ArrayList<Integer>();                
+            for (int j=0;j<ubigeosPrueba.length;j++){                
                 int ubigeo=ubigeosPrueba[j];                
-                //System.out.println("UBIGEO:  "+ubigeo );
+                //System.out.println("AYUDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"+ubigeo );
                 List<Beneficiario> beneDistrito = beneficiarios.stream().filter(a -> a.getDistrito().getUbigeo()==(ubigeo)).collect(Collectors.toList());
                // System.out.println("Cantidad beneficiarios: "+ beneDistrito.size());
                 List<LugarCobro> lugaresDistritos = lugares.stream().filter(a -> a.getDistrito().getUbigeo()==(ubigeo)).collect(Collectors.toList());
@@ -58,7 +52,7 @@ public class GRASP {
                int ind_resul=resultado.size();
                int paramLugaCobro[][] = new int[lugaresDistritos.size()][5];        
                 for (int m = 0; m < lugaresDistritos.size(); m++){
-                    LugarCobro l=lugaresDistritos.get(m);
+                    LugarCobro l=lugares.get(m);
                     paramLugaCobro[m][0] = l.getIdAgencia(); // identificador del lugar de cobro
                     if(l.getDistrito().getDensidad()>limite_densidad){
                         paramLugaCobro[m][1] = (int)Math.round(l.getCajas()*l.getPerHora()*(1-reduccion_densidad)); // cantidad de personas por hora
@@ -85,7 +79,7 @@ public class GRASP {
                 int hora_actual=inicio_horario;
                 int dia_actual=1;
                 while(faltantes>0){
-                    //System.out.println("Hora y dia:"+hora_actual+"-"+dia_actual);
+                    System.out.println("Hora y dia:"+hora_actual+"-"+dia_actual);
                     int pass=1;
                     for(int k = 0; k<lugaresDistritos.size();k++){
                         LugarCobro lug = lugaresDistritos.get(k);
@@ -152,14 +146,9 @@ public class GRASP {
                                         break;
                                     }
                                 }
-                                if(x==1){
-                                    for(int h=0; h<horaPreferencial.length;h++){
-                                        int dif=Math.abs(horaPreferencial[h]-hora_actual);
-                                        if(dif<min){min=dif;}
-                                    }
-                                }
-                                else{
-                                    min=0;
+                                for(int h=0; h<horaPreferencial.length;h++){
+                                    int dif=Math.abs(horaPreferencial[h]-hora_actual);
+                                    if(dif<min){min=dif;}
                                 }
                                 funcion+=min;
                                 //System.out.println("pruebaa: "+solucionxdistrito[0][0]);
@@ -175,36 +164,25 @@ public class GRASP {
                             yeri=preferencial;
                         }
                         //System.out.println("hombres: "+hombres+" - Mujeres: "+mujeres);
-                        if(hombres>paramLugaCobro[k][1]*0.6){
-                            funcion+=Math.abs((int)(hombres-paramLugaCobro[k][1]*0.6));
-                        }                        
+                        funcion+=Math.abs(hombres-mujeres);
                         int prioritarios=resultado.get(ind_resul+k).getUltimoHorario().getPrioridad().size();
                         int no_prioritarios=resultado.get(ind_resul+k).getUltimoHorario().getNoPrioridad().size();
                         if((preferencial==1 && no_prioritarios>0)){
-                            Integer[] horario=new Integer[2];
+                            Integer[] horario=new Integer[3];
                             horario[0]=ind_resul+k;//agencia
                             horario[1]=resultado.get(ind_resul+k).getHorarios().size()-1;//horario
                             horarios_preferencial.add(horario);
-                            if(!agencias.contains(horario[0])){
-                                agencias.add(horario[0]);
-                            }
                         }else if (preferencial==0 && prioritarios>0){
-                            if(ubigeo==100005){
-                                System.out.println("AQui");
-                            }
-                            Integer[] horario=new Integer[2];
+                            Integer[] horario=new Integer[3];
                             horario[0]=ind_resul+k;//agencia
                             horario[1]=resultado.get(ind_resul+k).getHorarios().size()-1;//horario   
                             horarios_no_preferencial.add(horario);
-                            if(!agencias.contains(horario[0])){
-                                agencias.add(horario[0]);
-                            }
                         }
                         
                         if(yeri==1 && no_prioritarios>0){
-                            //System.out.println("Priritarios: "+prioritarios+" - NO prioritarios: "+no_prioritarios);
+                            System.out.println("Priritarios: "+prioritarios+" - NO prioritarios: "+no_prioritarios);
                         }else if(yeri==0 && prioritarios>0){
-                            //System.out.println("Priritarios: "+prioritarios+" - NO prioritarios: "+no_prioritarios);
+                            System.out.println("Priritarios: "+prioritarios+" - NO prioritarios: "+no_prioritarios);
                         }                        
                         paramLugaCobro[k][2]=paramLugaCobro[k][1];
                         if(faltantes==0)break;
@@ -217,133 +195,49 @@ public class GRASP {
                         else{hora_actual=inicio_horario;}
                     }else{hora_actual++;}     
                 }
-                /*
-                for(int n=0;n<resultado.size();n++){
-                    ResulAgencia r= resultado.get(n);
-                    System.out.println("Agencia ID:"+r.getId());
-                    System.out.println("-------------------------------------------------------");
-                    for(int t=0;t<r.getHorarios().size();t++){
-                        //System.out.println(" ");
-                        ResulHorario h = r.getHorarios().get(t);
-                        System.out.println("Dia:"+h.getDia()+" Hora:"+h.getHora());
-                        int prioritarios=h.sizeProridad();
-                        int no_prioritarios=h.sizeNoProridad();
-                        System.out.println("Priritarios: "+prioritarios+" - NO prioritarios: "+no_prioritarios);                        
-                        System.out.println("Hombres:"+h.getCantHombres());
-                        System.out.println("Mujeres:"+h.getCantMujeres());                                                
-                        System.out.println("-------------------------------------------------------");
-                        List<Integer> np=h.getNoPrioridad();
-                        for(int ñ=0;ñ<np.size();ñ++){
-                            System.out.print(np.get(ñ)+"");
-                            int pos=h.getPosNoPrioridad().get(ñ);
-                            System.out.print("  ID corroborar: "+beneDistrito.get(pos).getCodigoHogar());
-                            System.out.println("   Mayor:"+beneDistrito.get(pos).getFlagMayor()+"    Discapacitado:"+beneDistrito.get(pos).getFlagDis());
-                        }
-                        List<Integer> p=h.getPrioridad();
-                        for(int ñ=0;ñ<p.size();ñ++){
-                            System.out.print(p.get(ñ)+"");
-                            int pos=h.getPosprioridad().get(ñ);
-                            System.out.print("  ID corroborar: "+beneDistrito.get(pos).getCodigoHogar());
-                            System.out.println("   Mayor:"+beneDistrito.get(pos).getFlagMayor()+"      Discapacitado:"+beneDistrito.get(pos).getFlagDis());
-                        }
-                    //}
-                    //System.out.println(" ");
-                }*/
-                //System.out.println("Resultado de funcion antes:"+funcion);
-                //System.out.println("-------------------------------------------------------");
-                //System.out.println(); 
-                //System.out.println("==================================================================================================================0");
-                
                 //------------------------------------------------------Mejora---------------------------------
                 //prioritarios en no preferenciales
+                int nuevo_preferencial=horaPreferencial[horaPreferencial.length-1]+1;      
                 
-                int nuevo_preferencial=horaPreferencial[horaPreferencial.length-1]+1;
-                int diferencia_nuevo=1;
-                for (int m = 0; m < agencias.size(); m++){                    
-                    int posAgencia=agencias.get(m);
-                    ResulAgencia resulAgencia=resultado.get(posAgencia);
-                    int h_inicioLV=resulAgencia.getApertura_LV();
-                    int h_cierreLV=resulAgencia.getCierre_LV();
-                    int h_inicioS=resulAgencia.getApertura_S();
-                    int h_cierreS=resulAgencia.getCierre_S();
-                    
-                    int bloqueInicio_LV=nuevo_preferencial-h_inicioLV;
-                    int bloqueFin_LV=h_cierreLV-nuevo_preferencial;
-                    int bloqueInicio_S=nuevo_preferencial-h_inicioS;
-                    int bloqueFin_S=h_cierreS-nuevo_preferencial;
-                    
-                    int posicion_cambio=bloqueInicio_LV;//Horario tentador a cambiar
-                    List<Integer[]> horarios_mejora_Agencia = horarios_no_preferencial.stream().filter(a ->a[0]==posAgencia).collect(Collectors.toList());
-                    int dia=1;
-                    for(int g=0;g<horarios_mejora_Agencia.size();g++){                        
-                        Integer[] horario=horarios_mejora_Agencia.get(g);//id agencia y horario a cambiar
-                        ResulHorario resulhorario=resulAgencia.getUnHorario(horario[1]);
-                        if(ubigeo==100005){
-                            System.out.println("horario: "+resulhorario.getDia()+" "+resulhorario.getHora());
-                        }
-                        if(g==0 && resulhorario.sizeNoProridad()>0){
-                            horarios_mejora_Agencia.add(horario);
-                            continue;
-                        }                        
-                        int hora_horario=resulhorario.getHora();//hora del horario a cambiar
-                        int cantPrioritarios=resulhorario.sizeProridad();
-                        //int solo_prioritario=0;
-                        int diferencia_horaPrioritaria=23;
-                        for(int h=0; h<horaPreferencial.length;h++){
-                            int dif=Math.abs(horaPreferencial[h]-hora_horario);
-                            if(dif<diferencia_horaPrioritaria){diferencia_horaPrioritaria=dif;}
-                        }
-                        //==============================================================
-                        //if(resulhorario.sizeNoProridad()==0){solo_prioritario=1;}
-                        //else{continue;}
-                        //Por el momento solo se cambia los que tienen horarios no preferenciales llenos de puros prioritarios
-                        //==============================================================
-                        if(resulhorario.getHora()==nuevo_preferencial){
-                            continue;//Horario a cambiar tiene la hora nueva preferencial, por lo tanto no se cambia
-                        }
-                        else{
-                            boolean no_cambiado=true;                            
-                            while(no_cambiado){
-                                ResulHorario horarioCambio=resulAgencia.getUnHorario(posicion_cambio);
-                                if(horarioCambio.sizeProridad()==0){
-                                    resultado.get(horario[0]).cambiarHorario(horario[1], posicion_cambio);
-                                    no_cambiado=false;
-                                }
-                                if(dia%6!=0){posicion_cambio+=bloqueFin_LV;}                            
-                                else{posicion_cambio+=bloqueFin_S;}
-                                dia++;
-                                if(dia%6!=0){posicion_cambio+=bloqueInicio_LV;}                            
-                                else{posicion_cambio+=bloqueInicio_S;}
-                                if(posicion_cambio>resulAgencia.getHorarios().size()-1){
-                                    nuevo_preferencial++;
-                                    diferencia_nuevo++;                                    
-                                    bloqueInicio_LV=nuevo_preferencial-h_inicioLV;
-                                    bloqueFin_LV=h_cierreLV-nuevo_preferencial;
-                                    bloqueInicio_S=nuevo_preferencial-h_inicioS;
-                                    bloqueFin_S=h_cierreS-nuevo_preferencial;
-                                    posicion_cambio=bloqueInicio_LV;
-                                    dia=1;
-                                }
-                            }
-                            funcion=funcion-cantPrioritarios*(diferencia_horaPrioritaria-diferencia_nuevo);
-                        }
+                for(int g=0;g<horarios_no_preferencial.size();g++){
+                    Integer[] horario=horarios_no_preferencial.get(g);
+                    ResulAgencia resulAgencia=resultado.get(horario[0]);
+                    ResulHorario resulhorario=resultado.get(horario[0]).getHorarios().get(horario[1]);
+                    if(resulhorario.getHora()==nuevo_preferencial){
+                        break;
                     }
+                    else{
+                        int h_inicio=resulAgencia.getApertura_LV();
+                        int h_cierre=resulAgencia.getCierre_LV();
+                        boolean cambio=true;
+                        int bloque=h_cierre-h_inicio;
+                        int horario_cambio=nuevo_preferencial-h_inicio;//posicion del horario tentativo cambiar
+                        while(cambio){
+                            break;
+                        }
+                                           
+                        
+                    }
+                       
+                    
                 }
-                //System.out.println("Resultado con mejora UBIGEO:"+funcion);
-                /*
+                
+                
+                
+                
+                
                 for(int n=0;n<resultado.size();n++){
                     ResulAgencia r= resultado.get(n);
                     System.out.println("Agencia ID:"+r.getId());
                     System.out.println("-------------------------------------------------------");
                     for(int t=0;t<r.getHorarios().size();t++){
-                        //System.out.println(" ");
                         ResulHorario h = r.getHorarios().get(t);
-                        System.out.println("Dia:"+h.getDia()+"  Hora:"+h.getHora());
-                        int prioritarios=h.sizeProridad();
-                        int no_prioritarios=h.sizeNoProridad();
-                        System.out.println("Priritarios: "+prioritarios+" - NO prioritarios: "+no_prioritarios);                        
+                        System.out.println("Dia:"+h.getDia());
+                        System.out.println("Hora:"+h.getHora());
                         System.out.println("Hombres:"+h.getCantHombres());
-                        System.out.println("Mujeres:"+h.getCantMujeres());                                                
+                        System.out.println("Mujeres:"+h.getCantMujeres());
+                        if((r.getId()==10&&(h.getCantHombres()+h.getCantMujeres())<20)||(r.getId()==1&&(h.getCantHombres()+h.getCantMujeres())<18)){
+                         
                         System.out.println("-------------------------------------------------------");
                         List<Integer> np=h.getNoPrioridad();
                         for(int ñ=0;ñ<np.size();ñ++){
@@ -359,17 +253,21 @@ public class GRASP {
                             System.out.print("  ID corroborar: "+beneDistrito.get(pos).getCodigoHogar());
                             System.out.println("   Mayor:"+beneDistrito.get(pos).getFlagMayor()+"      Discapacitado:"+beneDistrito.get(pos).getFlagDis());
                         }
-                    }
+                        }
 
-                    //System.out.println(" ");
-                }*/
-                    //System.out.println("-------------------------------------------------------");
-                    //System.out.println();               
+                        System.out.println(" ");
+                    }
+                    System.out.println("-------------------------------------------------------");
+                    System.out.println();  
+                
+                }
             }
-            System.out.println("Resultado de funcion despues de mejora:"+funcion);
+            
+            System.out.println("Resultado de funcion:"+funcion);
             funcion=0;
         }
-            
         
     }
+    
+    
 }

@@ -10,14 +10,14 @@ import java.util.ArrayList;
 public class LeerCsv {
     public ArrayList<LugarCobro> leer(){
         ArrayList<LugarCobro> datos = new ArrayList<LugarCobro>();
-        Path filepath = Paths.get("C:\\Users\\USUARIO\\Downloads\\datos_dp\\a100.csv");
+        Path filepath = Paths.get("C:\\Users\\USUARIO\\Downloads\\as.csv");
         try{
             BufferedReader br = Files.newBufferedReader(filepath);
             String linea,cab;
             cab=br.readLine();
             while((linea=br.readLine())!=null){
                 String[] datosDeLinea =linea.split(";");
-                LugarCobro lugar= new LugarCobro(datosDeLinea,1);
+                LugarCobro lugar= new LugarCobro(datosDeLinea);
                 datos.add(lugar);
             }
             
@@ -26,16 +26,16 @@ public class LeerCsv {
         }
         return datos;
     }
-    public ArrayList<Beneficiario> leerBene(int horarios,int restar, int max_inci){
+    public ArrayList<Beneficiario> leerBene(){
         ArrayList<Beneficiario> datos = new ArrayList<Beneficiario>();
-        Path filepath = Paths.get("C:\\Users\\USUARIO\\Downloads\\datos_dp\\b100000.csv");
+        Path filepath = Paths.get("C:\\Users\\USUARIO\\Downloads\\bs.csv");
         try{
             BufferedReader br = Files.newBufferedReader(filepath);
             String linea,cab;
             cab=br.readLine();
             while((linea=br.readLine())!=null){
                 String[] datosDeLinea =linea.split(";");
-                Beneficiario lugar= new Beneficiario(datosDeLinea,horarios,restar,max_inci);
+                Beneficiario lugar= new Beneficiario(datosDeLinea);
                 datos.add(lugar);
             }
         }catch(IOException e){
