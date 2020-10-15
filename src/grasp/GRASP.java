@@ -175,8 +175,8 @@ public class GRASP {
                             yeri=preferencial;
                         }
                         //System.out.println("hombres: "+hombres+" - Mujeres: "+mujeres);
-                        if(hombres>paramLugaCobro[k][1]*0.6){
-                            funcion+=Math.abs((int)(hombres-paramLugaCobro[k][1]*0.6));
+                        if(hombres>paramLugaCobro[k][1]*0.5){
+                            funcion+=Math.abs((int)(hombres-paramLugaCobro[k][1]*0.5));
                         }                        
                         int prioritarios=resultado.get(ind_resul+k).getUltimoHorario().getPrioridad().size();
                         int no_prioritarios=resultado.get(ind_resul+k).getUltimoHorario().getNoPrioridad().size();
@@ -326,6 +326,7 @@ public class GRASP {
                         }
                     }
                 }
+                
                 //System.out.println("Resultado con mejora UBIGEO:"+funcion);
                 /*
                 for(int n=ind_resul;n<resultado.size();n++){
@@ -338,7 +339,7 @@ public class GRASP {
                         System.out.println("Dia:"+h.getDia()+"  Hora:"+h.getHora());
                         int prioritarios=h.sizeProridad();
                         int no_prioritarios=h.sizeNoProridad();
-                        System.out.println("Priritarios: "+prioritarios+" - NO prioritarios: "+no_prioritarios);                        
+                        System.out.println("Prioritarios: "+prioritarios+" - NO prioritarios: "+no_prioritarios);                        
                         System.out.println("Hombres:"+h.getCantHombres());
                         System.out.println("Mujeres:"+h.getCantMujeres());                                                
                         System.out.println("-------------------------------------------------------");
