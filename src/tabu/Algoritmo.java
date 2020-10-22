@@ -1,5 +1,5 @@
 
-package grasp;
+package tabu;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,7 @@ public class Algoritmo {
                     prio=1;
                 }
                 //int bond= (int)((preferencial*( 5*ben.getFlagDis()+ 5*ben.getFlagMayor()) + (1-preferencial) *(5*(1-ben.getFlagDis())+ 5*(1-ben.getFlagMayor()))) /(1+2*ben.getCantInci()+ 3*(((hom*hombres+(1-hom)*mujeres))/(1+(hombres+mujeres))))); 
-                int bond= (int)((preferencial*(5*prio) + (1-preferencial) *(5*(1-prio)))+(2*candidatos.get(i).getHorarioRestantes()) /(1+ 3*(((hom*hombres+(1-hom)*mujeres))/(1+(hombres+mujeres))))); 
+                int bond= (int)((preferencial*(5*prio) + (1-preferencial) *(5*(1-prio))+(2*candidatos.get(i).getHorarioRestantes())) /(1+ 3*(((hom*hombres+(1-hom)*mujeres))/(1+(hombres+mujeres))))); 
                 //System.out.println(bond);
                 candidatos.get(i).setBondad(bond);
                 

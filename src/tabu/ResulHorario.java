@@ -1,4 +1,4 @@
-package grasp;
+package tabu;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,8 +16,11 @@ public class ResulHorario {
     private int cantHombres;
     private List<Integer> noPrioridad = new ArrayList<Integer>();
     private List<Integer> posNoPrioridad = new ArrayList<Integer>();
+    private List<Integer> genNoPrioridad = new ArrayList<Integer>();
     private List<Integer> prioridad = new ArrayList<Integer>();
     private List<Integer> posprioridad = new ArrayList<Integer>();
+    private List<Integer> genPrioridad = new ArrayList<Integer>();
+    
 
     public int sizeNoProridad(){
         return noPrioridad.size();
@@ -43,15 +46,20 @@ public class ResulHorario {
             boolean esta=noPrioridad.contains(indice);
             //System.out.println("ESTA; -------------"+esta);
             if(esta){return false;}
-            else{noPrioridad.add(indice);
-            posNoPrioridad.add(pos);            
+            else{
+                noPrioridad.add(indice);
+                posNoPrioridad.add(pos);
+                genNoPrioridad.add(gen);
+                
             }
         }else{
             boolean esta=prioridad.contains(indice);
             //System.out.println("ESTA; -------------"+esta);
             if(esta){return false;}
-            else{prioridad.add(indice);
-            posprioridad.add(pos);            
+            else{
+                prioridad.add(indice);
+                posprioridad.add(pos);  
+                genPrioridad.add(gen);
             }
         }
         if (gen == 1){cantHombres++;}
@@ -124,6 +132,22 @@ public class ResulHorario {
 
     public void setPrioridad(List<Integer> prioridad) {
         this.prioridad = prioridad;
+    }
+
+    public List<Integer> getGenNoPrioridad() {
+        return genNoPrioridad;
+    }
+
+    public void setGenNoPrioridad(List<Integer> genNoPrioridad) {
+        this.genNoPrioridad = genNoPrioridad;
+    }
+
+    public List<Integer> getGenPrioridad() {
+        return genPrioridad;
+    }
+
+    public void setGenPrioridad(List<Integer> genPrioridad) {
+        this.genPrioridad = genPrioridad;
     }
     
     
