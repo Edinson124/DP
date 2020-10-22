@@ -9,6 +9,7 @@ import java.util.List;
  */
 public class ResulAgencia {
     private int id;
+    private int ubigeo;
     private int apertura_LV;
     private int cierre_LV;
     private int apertura_S;
@@ -29,6 +30,14 @@ public class ResulAgencia {
         horarios.get(y).setDia(diaY);
         horarios.get(y).setHora(horaY);
         
+    }
+
+    public int getUbigeo() {
+        return ubigeo;
+    }
+
+    public void setUbigeo(int ubigeo) {
+        this.ubigeo = ubigeo;
     }
     
     
@@ -87,8 +96,9 @@ public class ResulAgencia {
         return insercion;
     }
 
-    public ResulAgencia(int id,int hALV,int HCLV,int HAS,int HCS) {
+    public ResulAgencia(int ubi,int id,int hALV,int HCLV,int HAS,int HCS) {
         this.id = id;
+        this.ubigeo = ubi;
         this.apertura_LV=hALV;
         this.cierre_LV=HCLV;
         this.apertura_S=HAS;

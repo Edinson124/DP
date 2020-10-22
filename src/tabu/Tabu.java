@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  *
@@ -42,10 +43,14 @@ public class Tabu {
         double reduccion_densidad=0.40;
         //Long tiempo_ejecucion = System.currentTimeMillis();
         Integer[] horaPreferencial = {8,9};
-        int iteraciones = 20;
+        int iteraciones = 10;
         Algoritmo algoritmo =  new Algoritmo();
+        //List<Integer[]> horarios_sexo = new ArrayList<Integer[]>();
+        //List<Integer> agencias_sexo = new ArrayList<Integer>();
         
         for (int i = 0; i < iteraciones; i++){
+            List<Integer[]> horarios_sexo = new ArrayList<Integer[]>();
+            List<Integer> agencias_sexo = new ArrayList<Integer>();
             int fitnessPersonas=0;
             int fitnessHoras=0;
             int horasMax=0;
@@ -88,7 +93,7 @@ public class Tabu {
                     paramLugaCobro[m][4] = l.getHoraAperturaLV().getHours(); // hora
                     if(paramLugaCobro[m][4]<inicio_horario){inicio_horario=paramLugaCobro[m][4];}
                     if(l.getHoraAperturaS().getHours()<inicio_sabado){inicio_sabado=l.getHoraAperturaS().getHours();}
-                    ResulAgencia r = new ResulAgencia(l.getIdAgencia(),l.getHoraAperturaLV().getHours(),l.getHoraCierreLV().getHours(),l.getHoraAperturaS().getHours(),l.getHoraCierreS().getHours());
+                    ResulAgencia r = new ResulAgencia(l.getDistrito().getUbigeo(),l.getIdAgencia(),l.getHoraAperturaLV().getHours(),l.getHoraCierreLV().getHours(),l.getHoraAperturaS().getHours(),l.getHoraCierreS().getHours());
                     resultado.add(r);
                 } 
                 //System.out.println(resultado.size());
@@ -210,6 +215,13 @@ public class Tabu {
                         if(hombres>(hombres+mujeres)*0.5){
                             fitnessPersonas+=Math.abs((int)(hombres-(hombres+mujeres)*0.5));
                             horariosMalaDistribucion++;
+                            Integer[] horario = new Integer[2];
+                            horario[0] = ind_resul + k;//agencia
+                            horario[1] = resultado.get(ind_resul + k).getHorarios().size() - 1;//horario   
+                            horarios_sexo.add(horario);
+                            if (!agencias.contains(horario[0])) {
+                                agencias_sexo.add(horario[0]);
+                            }
                         }  
                         //turnos+=hombres+mujeres;
                         horariosTotales++;
@@ -359,6 +371,9 @@ public class Tabu {
                         }
                     }
                 }
+            //------------------------------------------------------Mejora---------------------------------
+            //prioritarios en no preferenciales
+            
                 
                 
                 //------------------------------------------------------Mejora---------------------------------
@@ -547,6 +562,61 @@ public class Tabu {
                 
                     //System.out.println("-------------------------------------------------------");
                     //System.out.println();               
+            }
+            for (Integer[] hr : horarios_sexo) {
+                int agencia=hr[0];
+                int horario=hr[1];
+                //System.out.print("Agencia: " + agencia+"  Horario: "+horario);
+            }           
+            for (Integer[] hr : horarios_sexo) {
+                int prefe=0;
+                int agencia=hr[0];
+                int horario=hr[1];
+                ResulAgencia r=resultado.get(agencia);
+                //System.out.println("Ubigeo: "+ r.getUbigeo());
+                //System.out.print("Agencia: " + r.getId());
+                ResulHorario ho=resultado.get(agencia).getHorarios().get(horario);
+                //System.out.println(" Hora: " +ho.getHora() +" Dia: "+ ho.getDia());
+                if (Arrays.asList(horaPreferencial).contains(ho.getHora())){
+                    prefe=1;
+                }
+                double p_i=100.0*ho.getCantHombres()/(ho.getCantHombres()+ho.getCantMujeres());
+                int index  = IntStream.range(0, resultado.size()).filter(a-> resultado.get(a).getUbigeo() == r.getUbigeo()).findFirst().orElse(-1);
+                for(int l=index;l<resultado.size();l++){
+                    ResulAgencia Acambio=resultado.get(l);
+                    if(Acambio.getUbigeo()!=r.getUbigeo()){
+                        break;
+                    }
+                    int tam=Acambio.getHorarios().size();
+                    for(int j=0;j<tam;j++){
+                        ResulHorario Hcambio=Acambio.getUnHorario(j);
+                        int cambio_preferencial=0;
+                        if (Arrays.asList(horaPreferencial).contains(Hcambio.getHora())){
+                            cambio_preferencial=1;
+                        }
+                        if(prefe!=cambio_preferencial){
+                            continue;
+                        }
+                        double p_j= 100.0*Hcambio.getCantHombres()/(Hcambio.getCantHombres()+Hcambio.getCantMujeres());
+                        if(p_j<50){                            
+                            p_j=100.0*(Hcambio.getCantHombres()+1)/((Hcambio.getCantHombres()+1)+(Hcambio.getCantMujeres()-1));
+                            if(p_j<=50){
+                                //System.out.println("Cambio hecho");
+                                resultado.get(l).getUnHorario(j).setCantHombres(Hcambio.getCantHombres()+1);
+                                resultado.get(l).getUnHorario(j).setCantMujeres(Hcambio.getCantMujeres()-1);
+                                resultado.get(agencia).getUnHorario(horario).setCantHombres(ho.getCantHombres()-1);
+                                resultado.get(agencia).getUnHorario(horario).setCantMujeres(ho.getCantMujeres()+1);
+                                ho=resultado.get(agencia).getHorarios().get(horario);
+                                p_i=100.0*ho.getCantHombres()/(ho.getCantHombres()+ho.getCantMujeres());
+                            }
+                        }
+                    }
+                    if(p_i<50){
+                        //System.out.println("Remover");
+                        horariosMalaDistribucion--;
+                        break;
+                    }
+                }
             }
                 double fitness1 = (double)100*horariosMalaDistribucion/horariosTotales;
                 double fitness2 = (double)200*fitnessHoras/horasMax;
